@@ -7,3 +7,14 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[functions]
+  included_files = ["src/config/prompts/**"]
+
+[[functions]]
+  path = "/api/analyze"
+  timeout = 120  # seconds
+
+[[functions]]
+  path = "/api/chat"
+  timeout = 60
