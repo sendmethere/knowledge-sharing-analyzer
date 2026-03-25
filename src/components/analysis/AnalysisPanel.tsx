@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeDistributionChart } from "./CodeDistributionChart";
 import { InsightCard } from "./InsightCard";
+import { RubricExplainer } from "./RubricExplainer";
 import { AnalysisSummary, ChatMessage } from "@/lib/types";
 
 interface Props {
@@ -95,6 +96,8 @@ export function AnalysisPanel({ analysis, isLoading, error, onAnalyze, messages 
           </Button>
         </>
       )}
+
+      <RubricExplainer />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { ArrowLeft, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatTimeline } from "@/components/chat/ChatTimeline";
 import { AnalysisPanel } from "@/components/analysis/AnalysisPanel";
-import { AIChatDrawer } from "@/components/ai-chat/AIChatDrawer";
+import { AIChatFloat } from "@/components/ai-chat/AIChatFloat";
 import { getScenarioById } from "@/lib/scenarios";
 import { useAnalysis } from "@/hooks/useAnalysis";
 
@@ -21,7 +21,7 @@ export default function ScenarioPage() {
   const { analysis, isLoading, error, analyze } = useAnalysis(scenario.id);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen bg-gray-50 flex flex-col">
       {/* Top Bar */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
@@ -47,9 +47,9 @@ export default function ScenarioPage() {
       </header>
 
       {/* Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Chat Panel */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Selected message detail */}
           {selectedMsgId && analysis && (
             <div className="bg-blue-50 border-b px-4 py-2">
@@ -72,7 +72,7 @@ export default function ScenarioPage() {
               })()}
             </div>
           )}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden min-h-0">
             <ChatTimeline
               messages={scenario.chatHistory}
               classifications={analysis?.classifiedMessages}
@@ -83,7 +83,7 @@ export default function ScenarioPage() {
         </div>
 
         {/* Analysis Sidebar */}
-        <aside className="w-72 border-l bg-white overflow-y-auto p-4 hidden lg:block">
+        <aside className="w-72 border-l bg-white overflow-y-auto p-4 hidden lg:block flex-shrink-0">
           <AnalysisPanel
             analysis={analysis}
             isLoading={isLoading}
@@ -111,22 +111,14 @@ export default function ScenarioPage() {
         )}
       </div>
 
-      {/* AI Chat Drawer */}
-      <AIChatDrawer
+      {/* AI Chat Float */}
+      <AIChatFloat
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         scenarioTitle={scenario.title}
         scenarioTopic={scenario.topic}
         analysis={analysis}
       />
-
-      {/* Overlay for chat drawer on mobile */}
-      {isChatOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 z-40 sm:hidden"
-          onClick={() => setIsChatOpen(false)}
-        />
-      )}
     </div>
   );
 }
