@@ -2,9 +2,8 @@ import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { buildAIChatSystemPrompt, AI_CHAT_PARAMS } from "@/lib/prompts";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 export async function POST(req: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const { messages, scenarioContext } = await req.json();
 
   const stream = await openai.chat.completions.create({

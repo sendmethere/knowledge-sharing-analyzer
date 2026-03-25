@@ -8,9 +8,8 @@ import {
 } from "@/lib/prompts";
 import { ChatMessage, ClassificationResult } from "@/lib/types";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 export async function POST(req: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const { messages }: { messages: ChatMessage[] } = await req.json();
   const contextWindow = CLASSIFICATION_PARAMS.context_window;
   const results: ClassificationResult[] = [];
