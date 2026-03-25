@@ -1,0 +1,67 @@
+{
+  "system": "당신은 협력학습 대화를 분석하는 전문가입니다.\nNoroozi et al.의 Transactive Knowledge Sharing 루브릭을 사용하여 각 발화를 분류합니다.\n\n## 분류 코드 정의\n\n1. **no_reaction**: 이전 발화가 있지만 내용을 전혀 참조하지 않음. \n   - 형식적 답변이나 완전한 무응답 포함.\n\n2. **externalization**: 이전 메시지를 참조하지 않고 자신의 지식·주장을 독립 서술.\n   - 스레드의 첫 메시지 또는 병렬 제시(juxtaposition) 포함.\n\n3. **acceptance**: 수정 없이 이전 발화에 동의.\n   - 단순 동의 표현 또는 내용 반복.\n\n4. **elicitation**: 파트너의 반응을 명시적·암묵적으로 요청.\n   - 질문, 제안, 참여 초대 포함.\n\n5. **integration**: 파트너 관점을 채택하여 복수 논거를 종합한 새로운 주장 생성.\n   - 단순 동의를 넘어 인식론적 진전이 있어야 함.\n\n6. **conflict**: 이전 발화를 거부·대체·수정.\n   - subtype: rejection(거부), replacement(대체), amendment(수정·추가)\n\n## 경계 사례 주의\n- \"I totally agree, but…\" → conflict(amendment)\n- 동의 후 완전히 새 주장 추가 → externalization\n- 의문형이지만 실제로는 주장 → externalization\n- 반박 후 종합안 제시 → conflict 또는 integration (부정적 평가의 명시성으로 구분)\n\n## 출력 형식 (JSON only)\n{\n  \"messageId\": \"string\",\n  \"code\": \"no_reaction|externalization|acceptance|elicitation|integration|conflict\",\n  \"subtype\": \"rejection|replacement|amendment|null\",\n  \"confidence\": 0.0–1.0,\n  \"reasoning\": \"한국어로 2–3문장 설명\",\n  \"alternativeCode\": \"string|null\",\n  \"alternativeConfidence\": 0.0–1.0,\n  \"needsReview\": true\n}\n\nneedsReview는 confidence < 0.6일 때 true로 설정하세요.\n반드시 JSON만 출력하고 다른 텍스트는 포함하지 마세요.",
+  "user_template": "## 대화 맥락 (최근 {context_count}개 발화)\n{context}\n\n## 분류 대상 발화\n[{message_id}] {speaker}: \"{text}\"\n\n위 발화를 분류하고 JSON으로 출력하세요.",
+  "parameters": {
+    "model": "gpt-4o",
+    "temperature": 0.2,
+    "response_format": "json_object",
+    "context_window": 3
+  },
+  "rubric_codes": {
+    "no_reaction": {
+      "label": "No Reaction",
+      "label_ko": "무반응",
+      "description": "이전 발화가 있지만 내용을 전혀 참조하지 않음",
+      "confidence_baseline": 0.55,
+      "color": "bg-gray-100",
+      "text_color": "text-gray-700",
+      "border_color": "border-gray-300"
+    },
+    "externalization": {
+      "label": "Externalization",
+      "label_ko": "외재화",
+      "description": "자신의 지식·주장을 독립적으로 서술",
+      "confidence_baseline": 0.82,
+      "color": "bg-blue-100",
+      "text_color": "text-blue-800",
+      "border_color": "border-blue-300"
+    },
+    "acceptance": {
+      "label": "Acceptance",
+      "label_ko": "수용",
+      "description": "수정 없이 이전 발화에 동의",
+      "confidence_baseline": 0.78,
+      "color": "bg-green-100",
+      "text_color": "text-green-800",
+      "border_color": "border-green-300"
+    },
+    "elicitation": {
+      "label": "Elicitation",
+      "label_ko": "유도",
+      "description": "파트너의 반응을 요청하거나 질문",
+      "confidence_baseline": 0.70,
+      "color": "bg-amber-100",
+      "text_color": "text-amber-800",
+      "border_color": "border-amber-300"
+    },
+    "integration": {
+      "label": "Integration",
+      "label_ko": "통합",
+      "description": "파트너 관점을 채택해 새로운 종합 생성",
+      "confidence_baseline": 0.62,
+      "color": "bg-purple-100",
+      "text_color": "text-purple-800",
+      "border_color": "border-purple-300"
+    },
+    "conflict": {
+      "label": "Conflict",
+      "label_ko": "갈등",
+      "description": "이전 발화를 거부·대체·수정",
+      "confidence_baseline": 0.73,
+      "color": "bg-orange-100",
+      "text_color": "text-orange-800",
+      "border_color": "border-orange-300"
+    }
+  },
+  "needs_review_threshold": 0.6
+}
