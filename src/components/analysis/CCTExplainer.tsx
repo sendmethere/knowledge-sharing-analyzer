@@ -73,7 +73,11 @@ export function CCTExplainer({ alwaysOpen = false }: { alwaysOpen?: boolean }) {
 
   return (
     <div className="border rounded-lg overflow-hidden">
-      {!alwaysOpen && (
+      {alwaysOpen ? (
+        <div className="px-4 py-2.5 bg-gray-50 border-b">
+          <span className="text-sm font-medium">CCT 판단 기준</span>
+        </div>
+      ) : (
         <button
           className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium bg-gray-50 hover:bg-gray-100 transition-colors"
           onClick={() => setOpen((v) => !v)}
