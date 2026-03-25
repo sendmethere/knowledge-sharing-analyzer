@@ -1,6 +1,7 @@
 import { SCENARIOS } from "@/lib/scenarios";
 import { ScenarioCard } from "@/components/scenario/ScenarioCard";
 import { BookOpen } from "lucide-react";
+import { CCTExplainer } from "@/components/analysis/CCTExplainer";
 
 export default function HomePage() {
   return (
@@ -52,6 +53,11 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* CCT Explainer */}
+        <div className="mt-4">
+          <CCTExplainer />
         </div>
       </div>
     </main>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CodeDistributionChart } from "./CodeDistributionChart";
 import { InsightCard } from "./InsightCard";
 import { RubricExplainer } from "./RubricExplainer";
+import { CCTExplainer } from "./CCTExplainer";
 import { AnalysisSummary, CCTAnalysis, ChatMessage, RubricCode } from "@/lib/types";
 import { RUBRIC, CODE_ORDER } from "@/lib/rubric";
 
@@ -228,6 +229,7 @@ export function AnalysisPanel({ analysis, isLoading, error, onAnalyze, messages,
       )}
 
       <RubricExplainer />
+      <CCTExplainer />
     </div>
   );
 }
