@@ -12,7 +12,7 @@ interface Props {
   analysis: AnalysisSummary | null;
   isLoading: boolean;
   error: string | null;
-  onAnalyze: (messages: ChatMessage[]) => void;
+  onAnalyze: (messages: ChatMessage[], force?: boolean) => void;
   messages: ChatMessage[];
 }
 
@@ -90,9 +90,9 @@ export function AnalysisPanel({ analysis, isLoading, error, onAnalyze, messages 
             variant="outline"
             size="sm"
             className="w-full"
-            onClick={() => onAnalyze(messages)}
+            onClick={() => onAnalyze(messages, true)}
           >
-            재분석
+            재분석 (캐시 무시)
           </Button>
         </>
       )}
