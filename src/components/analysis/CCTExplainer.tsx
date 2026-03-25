@@ -128,16 +128,16 @@ export function CCTExplainer({ alwaysOpen = false }: { alwaysOpen?: boolean }) {
             );
           })}
 
-          <div className="px-4 py-3 bg-teal-50">
-            <p className="text-xs font-medium text-teal-700 mb-2">측정 지표</p>
-            <ul className="space-y-1.5">
+          <div className="px-4 py-3">
+            <div className="border rounded-lg p-3 space-y-1.5">
+              <p className="text-xs font-medium text-gray-700 mb-2">측정 지표</p>
               {METRICS.map((m) => (
-                <li key={m.label} className="text-xs text-teal-800">
-                  <span className="font-medium">{m.label}:</span>{" "}
-                  <span className="text-teal-700">{m.desc}</span>
-                </li>
+                <div key={m.label} className="text-xs text-gray-600">
+                  <span className="font-medium text-gray-700">{m.label}:</span>{" "}
+                  {m.desc}
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
       )}
