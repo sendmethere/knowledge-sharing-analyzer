@@ -19,13 +19,16 @@ export function useAnalysis(scenarioId: string, topic: string) {
   }, [scenarioId]);
 
   const analyze = useCallback(async (messages: ChatMessage[], force = false) => {
-    // 강제 재분석이 아니면 캐시 확인
+    // 강제 재분석이 아니면 캐시 확인 (CCT 데이터가 없는 구 캐시는 무시)
     if (!force) {
       try {
         const cached = localStorage.getItem(CACHE_KEY(scenarioId));
         if (cached) {
-          setAnalysis(JSON.parse(cached));
-          return;
+          const parsed = JSON.parse(cached) as AnalysisSummary;
+          if (parsed.cctAnalysis) {
+            setAnalysis(parsed);
+            return;
+          }
         }
       } catch {
         // ignore

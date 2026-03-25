@@ -25,7 +25,7 @@ async function classifySubstantive(openai: OpenAI, turns: Turn[], topic: string)
 
 async function segmentEpisodes(openai: OpenAI, turns: Turn[]) {
   const turnsList = turns
-    .map((t) => `[${t.id}|${t.isSubstantive ? "sub" : "non"}] ${t.speaker}: "${t.combinedText}"`)
+    .map((t) => `[${t.id}] ${t.speaker}: "${t.combinedText}"`)
     .join("\n");
   const userMsg = cctConfig.segmentation_user_template.replace("{turns_list}", turnsList);
   const res = await openai.chat.completions.create({
@@ -47,16 +47,17 @@ export async function POST(req: NextRequest) {
 
   const turns = mergeTurns(messages);
 
-  // Step 1: classify substantive (must complete before segmentation — substantive flags inform segmentation)
-  const substResults = await classifySubstantive(openai, turns, topic);
+  // Run both LLM calls in parallel to stay within Netlify function timeout
+  const [substResults, episodeGroups] = await Promise.all([
+    classifySubstantive(openai, turns, topic),
+    segmentEpisodes(openai, turns),
+  ]);
+
   const turnMap = new Map(turns.map((t) => [t.id, t]));
   substResults.forEach(({ turnId, isSubstantive }) => {
     const t = turnMap.get(turnId);
     if (t) t.isSubstantive = isSubstantive;
   });
-
-  // Step 2: segment episodes (uses substantive flags)
-  const episodeGroups = await segmentEpisodes(openai, turns);
 
   // Fallback: if LLM returns empty, treat whole conversation as one episode
   const groups =
