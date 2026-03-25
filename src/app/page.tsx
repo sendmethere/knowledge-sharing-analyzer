@@ -57,7 +57,7 @@ export default function HomePage() {
 
         {/* CCT Explainer */}
         <div className="mt-4">
-          <CCTExplainer />
+          <CCTExplainer alwaysOpen />
         </div>
       </div>
     </main>

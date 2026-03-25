@@ -65,21 +65,25 @@ const METRICS = [
   { label: "IE당 CCT 수", desc: "핵심 지표. 상호작용 에피소드 1개당 평균 공동구성적 턴 수. 높을수록 지식 공동구성이 활발함" },
 ];
 
-export function CCTExplainer() {
+export function CCTExplainer({ alwaysOpen = false }: { alwaysOpen?: boolean }) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  const isOpen = alwaysOpen || open;
+
   return (
     <div className="border rounded-lg overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium bg-gray-50 hover:bg-gray-100 transition-colors"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span>CCT 판단 기준</span>
-        {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-      </button>
+      {!alwaysOpen && (
+        <button
+          className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium bg-gray-50 hover:bg-gray-100 transition-colors"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span>CCT 판단 기준</span>
+          {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+        </button>
+      )}
 
-      {open && (
+      {isOpen && (
         <div className="divide-y">
           {LEVELS.map((level) => {
             const isExpanded = expanded === level.id;
