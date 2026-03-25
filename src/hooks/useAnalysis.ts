@@ -3,7 +3,7 @@ import { AnalysisSummary, ChatMessage, RubricCode } from "@/lib/types";
 
 const CACHE_KEY = (id: string) => `tks_analysis_${id}`;
 
-export function useAnalysis(scenarioId: string) {
+export function useAnalysis(scenarioId: string, topic: string) {
   const [analysis, setAnalysis] = useState<AnalysisSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,13 +34,29 @@ export function useAnalysis(scenarioId: string) {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
-      });
-      if (!res.ok) throw new Error("분석 요청 실패");
-      const { results } = await res.json();
+      // Run TKS and CCT in parallel
+      const [tksSettled, cctSettled] = await Promise.allSettled([
+        fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages }),
+        }).then((r) => {
+          if (!r.ok) throw new Error("TKS 분석 요청 실패");
+          return r.json();
+        }),
+        fetch("/api/analyze-cct", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages, topic }),
+        }).then((r) => {
+          if (!r.ok) throw new Error("CCT 분석 요청 실패");
+          return r.json();
+        }),
+      ]);
+
+      if (tksSettled.status === "rejected") throw tksSettled.reason;
+      const { results } = tksSettled.value;
+      const cctAnalysis = cctSettled.status === "fulfilled" ? cctSettled.value.cctAnalysis : undefined;
 
       const distribution: Record<RubricCode, number> = {
         no_reaction: 0,
@@ -83,6 +99,7 @@ export function useAnalysis(scenarioId: string) {
         interactionQuality: quality,
         insights,
         classifiedMessages: results,
+        cctAnalysis,
       };
 
       try {
@@ -96,7 +113,7 @@ export function useAnalysis(scenarioId: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [scenarioId]);
+  }, [scenarioId, topic]);
 
   return { analysis, isLoading, error, analyze };
 }

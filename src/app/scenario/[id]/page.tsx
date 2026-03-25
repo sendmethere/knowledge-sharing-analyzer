@@ -20,7 +20,7 @@ export default function ScenarioPage() {
   const [selectedMsgId, setSelectedMsgId] = useState<string | undefined>();
   const [highlightCode, setHighlightCode] = useState<RubricCode | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const { analysis, isLoading, error, analyze } = useAnalysis(scenario.id);
+  const { analysis, isLoading, error, analyze } = useAnalysis(scenario.id, scenario.topic);
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
@@ -81,6 +81,7 @@ export default function ScenarioPage() {
               selectedId={selectedMsgId}
               highlightCode={highlightCode}
               onSelect={setSelectedMsgId}
+              cctAnalysis={analysis?.cctAnalysis}
             />
           </div>
         </div>

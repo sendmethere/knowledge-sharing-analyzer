@@ -1,12 +1,12 @@
 "use client";
 
-import { BarChart3, Loader2 } from "lucide-react";
+import { BarChart3, Loader2, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CodeDistributionChart } from "./CodeDistributionChart";
 import { InsightCard } from "./InsightCard";
 import { RubricExplainer } from "./RubricExplainer";
-import { AnalysisSummary, ChatMessage, RubricCode } from "@/lib/types";
+import { AnalysisSummary, CCTAnalysis, ChatMessage, RubricCode } from "@/lib/types";
 import { RUBRIC, CODE_ORDER } from "@/lib/rubric";
 
 const COLORS: Record<RubricCode, string> = {
@@ -95,6 +95,41 @@ function SpeakerDistribution({
   );
 }
 
+function CCTCard({ cct }: { cct: CCTAnalysis }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Users className="w-4 h-4 text-teal-500" />
+          Co-Constructive Turn
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-1.5 text-sm">
+        <div className="flex justify-between">
+          <span className="text-gray-500">에피소드</span>
+          <span className="font-medium">{cct.episodes.length}개</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-500">상호작용 에피소드(IE)</span>
+          <span className="font-medium">{cct.totalInteractionEpisodes}개</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-500">실질적 발화</span>
+          <span className="font-medium">{cct.totalSubstantiveComments}개</span>
+        </div>
+        <div className="flex justify-between border-t pt-1.5 mt-1">
+          <span className="text-gray-700 font-medium">IE당 CCT</span>
+          <span className="font-bold text-teal-600">{cct.ccoTurnsPerIE.toFixed(1)}회</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-500">CCT 총계</span>
+          <span className="font-medium">{cct.ccoTurns.length}개</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface Props {
   analysis: AnalysisSummary | null;
   isLoading: boolean;
@@ -156,6 +191,8 @@ export function AnalysisPanel({ analysis, isLoading, error, onAnalyze, messages,
               </div>
             </CardContent>
           </Card>
+
+          {analysis.cctAnalysis && <CCTCard cct={analysis.cctAnalysis} />}
 
           <Card>
             <CardHeader className="pb-2">

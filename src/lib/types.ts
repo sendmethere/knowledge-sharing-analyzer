@@ -35,6 +35,39 @@ export interface Scenario {
   chatHistory: ChatMessage[];
 }
 
+export interface Turn {
+  id: string;
+  speaker: "A" | "B";
+  messageIds: string[];
+  combinedText: string;
+  isSubstantive?: boolean;
+}
+
+export interface Episode {
+  id: string;
+  topicLabel: string;
+  turnIds: string[];
+  messageIds: string[];
+  isInteractionEpisode: boolean;
+  ccoTurnCount: number;
+}
+
+export interface CCoTurn {
+  id: string;
+  episodeId: string;
+  messageIds: string[];
+}
+
+export interface CCTAnalysis {
+  turns: Turn[];
+  episodes: Episode[];
+  ccoTurns: CCoTurn[];
+  totalSubstantiveComments: number;
+  totalInteractionEpisodes: number;
+  substantivePerIE: number;
+  ccoTurnsPerIE: number;
+}
+
 export interface AnalysisSummary {
   scenarioId: string;
   totalMessages: number;
@@ -43,4 +76,5 @@ export interface AnalysisSummary {
   interactionQuality: "low" | "medium" | "high";
   insights: string[];
   classifiedMessages: ClassificationResult[];
+  cctAnalysis?: CCTAnalysis;
 }

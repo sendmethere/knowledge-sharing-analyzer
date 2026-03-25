@@ -23,10 +23,12 @@ interface Props {
   classification?: ClassResult;
   isSelected?: boolean;
   dimmed?: boolean;
+  isSubstantive?: boolean;
+  cctId?: string;
   onClick?: () => void;
 }
 
-export function ChatMessageItem({ message, classification, isSelected, dimmed, onClick }: Props) {
+export function ChatMessageItem({ message, classification, isSelected, dimmed, isSubstantive, cctId, onClick }: Props) {
   const isA = message.speaker === "A";
   const rubricDef = classification ? RUBRIC[classification.code as keyof typeof RUBRIC] : null;
 
@@ -36,7 +38,8 @@ export function ChatMessageItem({ message, classification, isSelected, dimmed, o
         "flex gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
         isA ? "flex-row" : "flex-row-reverse",
         isSelected ? "bg-blue-50 ring-1 ring-blue-200" : "hover:bg-gray-50",
-        dimmed && "grayscale opacity-30"
+        dimmed && "grayscale opacity-30",
+        cctId && "bg-amber-50/50"
       )}
       onClick={onClick}
     >
@@ -59,8 +62,8 @@ export function ChatMessageItem({ message, classification, isSelected, dimmed, o
         >
           {message.text}
         </div>
-        {classification && rubricDef && (
-          <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {classification && rubricDef && (
             <CodeBadge
               code={classification.code}
               rubricDef={rubricDef}
@@ -68,11 +71,19 @@ export function ChatMessageItem({ message, classification, isSelected, dimmed, o
               size="sm"
               confidence={classification.confidence}
             />
-            {classification.needsReview && (
-              <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-            )}
-          </div>
-        )}
+          )}
+          {cctId && (
+            <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">
+              {cctId.replace("cct-", "CCT #")}
+            </span>
+          )}
+          {isSubstantive === false && (
+            <span className="text-xs text-gray-400">비실질</span>
+          )}
+          {classification?.needsReview && (
+            <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+          )}
+        </div>
       </div>
     </div>
   );
