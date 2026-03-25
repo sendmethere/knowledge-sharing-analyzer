@@ -10,6 +10,7 @@ import { AnalysisPanel } from "@/components/analysis/AnalysisPanel";
 import { AIChatFloat } from "@/components/ai-chat/AIChatFloat";
 import { getScenarioById } from "@/lib/scenarios";
 import { useAnalysis } from "@/hooks/useAnalysis";
+import { RubricCode } from "@/lib/types";
 
 export default function ScenarioPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +18,7 @@ export default function ScenarioPage() {
   if (!scenario) notFound();
 
   const [selectedMsgId, setSelectedMsgId] = useState<string | undefined>();
+  const [highlightCode, setHighlightCode] = useState<RubricCode | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const { analysis, isLoading, error, analyze } = useAnalysis(scenario.id);
 
@@ -77,6 +79,7 @@ export default function ScenarioPage() {
               messages={scenario.chatHistory}
               classifications={analysis?.classifiedMessages}
               selectedId={selectedMsgId}
+              highlightCode={highlightCode}
               onSelect={setSelectedMsgId}
             />
           </div>
@@ -90,6 +93,8 @@ export default function ScenarioPage() {
             error={error}
             onAnalyze={analyze}
             messages={scenario.chatHistory}
+            highlightCode={highlightCode}
+            onHighlightCode={setHighlightCode}
           />
         </aside>
       </div>

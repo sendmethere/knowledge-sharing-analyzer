@@ -6,7 +6,94 @@ import { Button } from "@/components/ui/button";
 import { CodeDistributionChart } from "./CodeDistributionChart";
 import { InsightCard } from "./InsightCard";
 import { RubricExplainer } from "./RubricExplainer";
-import { AnalysisSummary, ChatMessage } from "@/lib/types";
+import { AnalysisSummary, ChatMessage, RubricCode } from "@/lib/types";
+import { RUBRIC, CODE_ORDER } from "@/lib/rubric";
+
+const COLORS: Record<RubricCode, string> = {
+  no_reaction:     "#9ca3af",
+  externalization: "#60a5fa",
+  acceptance:      "#4ade80",
+  elicitation:     "#fbbf24",
+  integration:     "#c084fc",
+  conflict:        "#fb923c",
+};
+
+function SpeakerDistribution({
+  analysis,
+  messages,
+}: {
+  analysis: AnalysisSummary;
+  messages: ChatMessage[];
+}) {
+  const speakerMap = new Map(messages.map((m) => [m.id, m.speaker]));
+
+  const bySpeaker: Record<"A" | "B", Record<RubricCode, number>> = {
+    A: { no_reaction: 0, externalization: 0, acceptance: 0, elicitation: 0, integration: 0, conflict: 0 },
+    B: { no_reaction: 0, externalization: 0, acceptance: 0, elicitation: 0, integration: 0, conflict: 0 },
+  };
+  const totalBySpeaker = { A: 0, B: 0 };
+
+  analysis.classifiedMessages.forEach((c) => {
+    const speaker = speakerMap.get(c.messageId) as "A" | "B" | undefined;
+    if (!speaker) return;
+    bySpeaker[speaker][c.code] = (bySpeaker[speaker][c.code] || 0) + 1;
+    totalBySpeaker[speaker]++;
+  });
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">학생별 발화 분포</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {(["A", "B"] as const).map((speaker) => {
+          const total = totalBySpeaker[speaker];
+          const speakerColor = speaker === "A" ? "#3b82f6" : "#a855f7";
+          return (
+            <div key={speaker} className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                  style={{ backgroundColor: speakerColor }}
+                >
+                  {speaker}
+                </span>
+                <span className="text-xs text-gray-500">{total}개 발화</span>
+              </div>
+              <div className="flex h-4 rounded-full overflow-hidden gap-px">
+                {CODE_ORDER.map((code) => {
+                  const count = bySpeaker[speaker][code] || 0;
+                  const pct = total > 0 ? (count / total) * 100 : 0;
+                  if (pct === 0) return null;
+                  return (
+                    <div
+                      key={code}
+                      title={`${RUBRIC[code].labelKo}: ${count}개 (${Math.round(pct)}%)`}
+                      style={{ width: `${pct}%`, backgroundColor: COLORS[code] }}
+                      className="transition-all"
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                {CODE_ORDER.map((code) => {
+                  const count = bySpeaker[speaker][code] || 0;
+                  if (count === 0) return null;
+                  return (
+                    <span key={code} className="text-xs text-gray-500 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: COLORS[code] }} />
+                      {RUBRIC[code].labelKo} {count}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
 
 interface Props {
   analysis: AnalysisSummary | null;
@@ -14,9 +101,11 @@ interface Props {
   error: string | null;
   onAnalyze: (messages: ChatMessage[], force?: boolean) => void;
   messages: ChatMessage[];
+  highlightCode?: RubricCode | null;
+  onHighlightCode?: (code: RubricCode | null) => void;
 }
 
-export function AnalysisPanel({ analysis, isLoading, error, onAnalyze, messages }: Props) {
+export function AnalysisPanel({ analysis, isLoading, error, onAnalyze, messages, highlightCode, onHighlightCode }: Props) {
   return (
     <div className="space-y-4">
       {!analysis && !isLoading && (
@@ -76,9 +165,13 @@ export function AnalysisPanel({ analysis, isLoading, error, onAnalyze, messages 
               <CodeDistributionChart
                 distribution={analysis.codeDistribution}
                 total={analysis.totalMessages}
+                highlightCode={highlightCode}
+                onHighlightCode={onHighlightCode}
               />
             </CardContent>
           </Card>
+
+          <SpeakerDistribution analysis={analysis} messages={messages} />
 
           <InsightCard
             insights={analysis.insights}

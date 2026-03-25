@@ -7,6 +7,8 @@ import { RubricCode } from "@/lib/types";
 interface Props {
   distribution: Record<RubricCode, number>;
   total: number;
+  highlightCode?: RubricCode | null;
+  onHighlightCode?: (code: RubricCode | null) => void;
 }
 
 // 명확한 색상 팔레트 (Tailwind 동적 클래스 대신 인라인 스타일)
@@ -30,7 +32,7 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
   return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 }
 
-function PieChart({ distribution, total }: Props) {
+function PieChart({ distribution, total, highlightCode, onHighlightCode }: Props) {
   const [hovered, setHovered] = useState<RubricCode | null>(null);
 
   const segments = CODE_ORDER.map((code) => ({
@@ -69,9 +71,14 @@ function PieChart({ distribution, total }: Props) {
             fill={arc.color}
             stroke="white"
             strokeWidth="1.5"
-            style={{ cursor: "pointer", transition: "d 0.15s" }}
+            style={{
+              cursor: "pointer",
+              transition: "d 0.15s",
+              opacity: highlightCode && highlightCode !== arc.code ? 0.3 : 1,
+            }}
             onMouseEnter={() => setHovered(arc.code)}
             onMouseLeave={() => setHovered(null)}
+            onClick={() => onHighlightCode?.(highlightCode === arc.code ? null : arc.code)}
           />
         ))}
         {/* 중앙 텍스트 */}
@@ -99,45 +106,58 @@ function PieChart({ distribution, total }: Props) {
 
       {/* 범례 */}
       <div className="grid grid-cols-2 gap-x-3 gap-y-1 w-full">
-        {arcs.map((arc) => (
-          <div
-            key={arc.code}
-            className="flex items-center gap-1.5 text-xs cursor-pointer"
-            onMouseEnter={() => setHovered(arc.code)}
-            onMouseLeave={() => setHovered(null)}
-          >
-            <span
-              className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
-              style={{ backgroundColor: arc.color }}
-            />
-            <span className={`truncate ${hovered === arc.code ? "font-semibold" : "text-gray-600"}`}>
-              {arc.def.labelKo}
-            </span>
-            <span className="ml-auto text-gray-400 flex-shrink-0">{arc.count}</span>
-          </div>
-        ))}
+        {arcs.map((arc) => {
+          const isHighlighted = highlightCode === arc.code;
+          return (
+            <div
+              key={arc.code}
+              className={`flex items-center gap-1.5 text-xs cursor-pointer rounded px-1 py-0.5 transition-all ${
+                isHighlighted ? "bg-gray-100 font-semibold" : "hover:bg-gray-50"
+              } ${highlightCode && !isHighlighted ? "opacity-40" : ""}`}
+              onMouseEnter={() => setHovered(arc.code)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => onHighlightCode?.(isHighlighted ? null : arc.code)}
+            >
+              <span
+                className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
+                style={{ backgroundColor: arc.color }}
+              />
+              <span className={`truncate ${hovered === arc.code || isHighlighted ? "font-semibold" : "text-gray-600"}`}>
+                {arc.def.labelKo}
+              </span>
+              <span className="ml-auto text-gray-400 flex-shrink-0">{arc.count}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function BarChart({ distribution, total }: Props) {
+function BarChart({ distribution, total, highlightCode, onHighlightCode }: Props) {
   return (
     <div className="space-y-2">
       {CODE_ORDER.map((code) => {
         const count = distribution[code] || 0;
         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
         const def = RUBRIC[code];
+        const isHighlighted = highlightCode === code;
+        const isDimmed = !!highlightCode && !isHighlighted;
         return (
-          <div key={code} className="flex items-center gap-2 text-sm">
-            <span className="w-14 text-xs text-gray-600 font-medium truncate">{def.labelKo}</span>
+          <div
+            key={code}
+            className={`flex items-center gap-2 text-sm cursor-pointer rounded px-1 py-0.5 transition-all ${
+              isHighlighted ? "bg-gray-100" : "hover:bg-gray-50"
+            } ${isDimmed ? "opacity-30" : ""}`}
+            onClick={() => onHighlightCode?.(isHighlighted ? null : code)}
+          >
+            <span className={`w-14 text-xs font-medium truncate ${isHighlighted ? "text-gray-800" : "text-gray-600"}`}>
+              {def.labelKo}
+            </span>
             <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
               <div
                 className="h-3 rounded-full transition-all duration-500"
-                style={{
-                  width: `${pct}%`,
-                  backgroundColor: COLORS[code],
-                }}
+                style={{ width: `${pct}%`, backgroundColor: COLORS[code] }}
               />
             </div>
             <span className="w-5 text-right text-xs font-medium text-gray-700">{count}</span>
@@ -149,7 +169,7 @@ function BarChart({ distribution, total }: Props) {
   );
 }
 
-export function CodeDistributionChart({ distribution, total }: Props) {
+export function CodeDistributionChart({ distribution, total, highlightCode, onHighlightCode }: Props) {
   const [view, setView] = useState<"bar" | "pie">("bar");
 
   return (
@@ -172,9 +192,9 @@ export function CodeDistributionChart({ distribution, total }: Props) {
       </div>
 
       {view === "bar" ? (
-        <BarChart distribution={distribution} total={total} />
+        <BarChart distribution={distribution} total={total} highlightCode={highlightCode} onHighlightCode={onHighlightCode} />
       ) : (
-        <PieChart distribution={distribution} total={total} />
+        <PieChart distribution={distribution} total={total} highlightCode={highlightCode} onHighlightCode={onHighlightCode} />
       )}
     </div>
   );

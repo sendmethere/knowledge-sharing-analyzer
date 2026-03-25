@@ -22,19 +22,21 @@ interface Props {
   message: ChatMsg;
   classification?: ClassResult;
   isSelected?: boolean;
+  dimmed?: boolean;
   onClick?: () => void;
 }
 
-export function ChatMessageItem({ message, classification, isSelected, onClick }: Props) {
+export function ChatMessageItem({ message, classification, isSelected, dimmed, onClick }: Props) {
   const isA = message.speaker === "A";
   const rubricDef = classification ? RUBRIC[classification.code as keyof typeof RUBRIC] : null;
 
   return (
     <div
       className={cn(
-        "flex gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+        "flex gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
         isA ? "flex-row" : "flex-row-reverse",
-        isSelected ? "bg-blue-50 ring-1 ring-blue-200" : "hover:bg-gray-50"
+        isSelected ? "bg-blue-50 ring-1 ring-blue-200" : "hover:bg-gray-50",
+        dimmed && "grayscale opacity-30"
       )}
       onClick={onClick}
     >
